@@ -1,26 +1,29 @@
-import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
+import Fastify, {
+  FastifyInstance,
+  RouteShorthandOptions,
+  onRequestHookHandler,
+} from 'fastify'
 import { Server, IncomingMessage, ServerResponse } from 'http'
+import routes from './routes/index.js' 
+import swaggerPlugin from '@fastify/swagger'
 
-const server: FastifyInstance = Fastify({})
+import swaggerUiPlugin from '@fastify/swagger-ui'
 
-const opts: RouteShorthandOptions = {
-  schema: {
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          pong: {
-            type: 'string'
-          }
-        }
-      }
-    }
-  }
-}
+import { swaggerConfig } from './config/swagger.js'
+import {swaggerUiConfig} from './config/swaggerUi.js'
 
-server.get('/ping', opts, (request, reply) => {
-  reply.send({ pong: 'it worked!g' })
-})
+const server: FastifyInstance = Fastify({logger:true})
+
+
+/**swagger */
+await server.register(swaggerPlugin, swaggerConfig)
+await server.register(swaggerUiPlugin, swaggerUiConfig);
+
+// fastifySwaggerUi(server)
+
+server.register(routes)
+
+
 
 server.listen({ port: 4000 }, (err) => {
   if (err) {

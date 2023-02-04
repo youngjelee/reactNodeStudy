@@ -3,6 +3,7 @@
     "semi" : false,
     "arrowParens":"always", 
     
-    "trailingComma": "all"
+    "trailingComma": "all",
+    
     
 }

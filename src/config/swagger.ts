@@ -16,8 +16,8 @@ export const swaggerConfig : SwaggerOptions =  {
     consumes: ['application/json'],
     produces: ['application/json'],
     tags: [
-      { name: 'user', description: 'User related end-points' },
-      { name: 'code', description: 'Code related end-points' }
+    //   { name: 'user', description: 'User related end-points' },
+    //   { name: 'code', description: 'Code related end-points' }
     ],
     // definitions: {
     //   User: {

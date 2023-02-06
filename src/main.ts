@@ -12,6 +12,7 @@ import swaggerUiPlugin from '@fastify/swagger-ui'
 import { swaggerConfig } from './config/swagger.js'
 import { swaggerUiConfig } from './config/swaggerUi.js'
 import db from './lib/db.js'
+import { AppError } from './lib/AppError.js'
 
 const server: FastifyInstance = Fastify({ logger: true })
 
@@ -27,8 +28,21 @@ const server: FastifyInstance = Fastify({ logger: true })
 /**swagger */
 await server.register(swaggerPlugin, swaggerConfig)
 await server.register(swaggerUiPlugin, swaggerUiConfig)
+// swagger fastifySwaggerUi(server)
 
-// fastifySwaggerUi(server)
+//errorHandler
+server.setErrorHandler(async (error, request, reply) => {
+  reply.statusCode = error.statusCode ?? 500
+
+  if (error instanceof AppError) {
+    reply.send({
+      name: error.name,
+      statusCode: error.statusCode,
+      message: error.message,
+    })
+  }
+  return error
+})
 
 server.register(routes)
 

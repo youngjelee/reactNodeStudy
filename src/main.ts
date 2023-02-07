@@ -13,6 +13,7 @@ import { swaggerConfig } from './config/swagger.js'
 import { swaggerUiConfig } from './config/swaggerUi.js'
 import db from './lib/db.js'
 import { AppError } from './lib/AppError.js'
+import 'dotenv/config'
 
 const server: FastifyInstance = Fastify({ logger: true })
 

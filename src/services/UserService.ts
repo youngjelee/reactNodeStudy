@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import db from '../lib/db.js'
 import { Exception } from 'sass'
 import { AppError } from '../lib/AppError.js'
+import { generateToken } from '../lib/tokens.js'
 
 const saltRounds = 10
 
@@ -19,6 +20,25 @@ class UserService {
     }
     return UserService.instance
   }
+
+  async generateTokens(userId: number, username: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      generateToken({
+        type: 'accessToken',
+        userId,
+        tokenId: 1,
+        username,
+      }),
+      generateToken({
+        type: 'refreshToken',
+        tokenId: 1,
+        rotationCounter: 1,
+      }),
+    ])
+
+    return { accessToken, refreshToken }
+  }
+
   login() {
     return 'login'
   }
@@ -35,13 +55,16 @@ class UserService {
     }
 
     const hash = await bcrypt.hashSync(password, saltRounds)
-    const user = db.user.create({
+    const user = await db.user.create({
       data: {
         username: username,
         passwordHash: hash,
       },
     })
-    return user
+
+    const tokens = await this.generateTokens(user.id, username)
+
+    return { tokens, user }
   }
 
   // constructor(){}

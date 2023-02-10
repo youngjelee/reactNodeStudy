@@ -7,17 +7,21 @@ import { AuthBody } from './types.js'
 const auth: FastifyPluginAsync = async (fastify) => {
   const userService = UserService.getInstance()
 
-  fastify.post('/login', { schema: loginSchema }, async () => {
-    return userService.login()
-  })
+  fastify.post<{ Body: AuthBody }>(
+    '/login',
+    { schema: loginSchema },
+    async (request) => {
+      return userService.login(request.body)
+    },
+  )
 
   fastify.post<{ Body: AuthBody }>(
     '/register',
     {
       schema: registerSchema,
     },
-    async (fastify) => {
-      const authResult = await userService.register(fastify.body)
+    async (request) => {
+      const authResult = await userService.register(request.body)
       return authResult
     },
   )

@@ -8,14 +8,14 @@ const tokenDuration = {
   refreshToken: '7d',
 }
 
-interface AccessTokenPayload {
+export interface AccessTokenPayload {
   type: 'accessToken'
   userId: number
   tokenId: number
   username: string
 }
 
-interface RefreshTokenPayload {
+export interface RefreshTokenPayload {
   type: 'refreshToken'
   tokenId: number
   rotationCounter: number

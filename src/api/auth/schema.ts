@@ -1,5 +1,6 @@
 import { FastifySchema } from 'fastify'
-import { appErrorSchema } from '../../lib/AppError.js'
+import { appErrorSchema, createAppErrorSchema } from '../../lib/AppError.js'
+import { userSchema } from '../../schema/userSchema.js'
 
 const authResultSchema = {
   type: 'object',
@@ -11,13 +12,7 @@ const authResultSchema = {
         refreshToken: { type: 'string' },
       },
     },
-    user: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        username: { type: 'string' },
-      },
-    },
+    user: userSchema,
   },
 }
 
@@ -33,6 +28,11 @@ export const loginSchema: FastifySchema = {
   body: { authBodySchema },
   response: {
     200: authResultSchema,
+    401: createAppErrorSchema({
+      name: 'AuthenticationError',
+      message: 'Invalid usernmae or password',
+      statusCode: 401,
+    }),
   },
 }
 
@@ -40,23 +40,10 @@ export const registerSchema: FastifySchema = {
   body: { authBodySchema },
   response: {
     200: authResultSchema,
-    409: {
-      ...appErrorSchema,
-      example: {
-        name: { type: 'string' },
-        message: { type: 'string' },
-        statusCode: { type: 'number' },
-      },
-    },
-    // {
-    //   description: 'Successful response',
-    //   type: 'object',
-    //   properties: {
-    //     token: { type: 'string' },
-    //   },
-    //   example: {
-    //     token: 'helloworld',
-    //   },
-    // },
+    409: createAppErrorSchema({
+      name: { type: 'string' },
+      message: { type: 'string' },
+      statusCode: { type: 'number' },
+    }),
   },
 }

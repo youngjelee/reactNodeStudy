@@ -15,6 +15,7 @@ import db from './lib/db.js'
 import { AppError } from './lib/AppError.js'
 import 'dotenv/config'
 import { authPlugin } from './plugins/authPlugin.js'
+import fastifyCookie from '@fastify/cookie'
 
 const server: FastifyInstance = Fastify({ logger: true })
 
@@ -37,6 +38,8 @@ server.setErrorHandler(async (error, request, reply) => {
   }
   return error
 })
+
+server.register(fastifyCookie)
 
 server.register(authPlugin)
 server.register(routes)

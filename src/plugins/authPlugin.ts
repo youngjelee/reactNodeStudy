@@ -31,13 +31,17 @@ const authPluginAsync: FastifyPluginAsync<MyPluginOptions> = async (
   fastify.decorateRequest('isExpiredToken', false)
 
   fastify.addHook('preHandler', async (request) => {
-    console.log('==============>', request.headers.authorization)
-    const { authorization } = request.headers
-    if (!authorization || !authorization.includes('Bearer')) {
-      return
-    }
+    // const { authorization } = request.headers
+    // if (!authorization || !authorization.includes('Bearer')) {
+    //   return
+    // }
 
-    const token = authorization.split('Bearer ')[1]
+    const token =
+      request.headers.authorization?.split('Bearer ')[1] ??
+      request.cookies.access_token
+
+    if (!token) return
+
     try {
       const decoded = await validateToken<AccessTokenPayload>(token)
       console.log('decoded ::::::::', decoded)

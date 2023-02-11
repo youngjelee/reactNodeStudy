@@ -10,8 +10,21 @@ const auth: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: AuthBody }>(
     '/login',
     { schema: loginSchema },
-    async (request) => {
-      return userService.login(request.body)
+    async (request, reply) => {
+      const authResult = await userService.login(request.body)
+
+      reply.setCookie('access_token', authResult.tokens.accessToken, {
+        httpOnly: true, //block javascript access to cookie
+        expires: new Date(Date.now() + 1000 * 60 * 60),
+        path: '/',
+      })
+      reply.setCookie('refesh_token', authResult.tokens.refreshToken, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        path: '/',
+      })
+
+      return authResult
     },
   )
 

@@ -3,7 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken'
 const JWT_SECRET = process.env.JWT_SECRET ?? 'DevSecretKey'
 export const ACCESS_TOKEN_DURATION = '1h'
 export const REFESH_TOKEN_DURATION = '7d'
-const tokenDuration = {
+export const tokenDuration = {
   accessToken: '1h',
   refreshToken: '7d',
 }

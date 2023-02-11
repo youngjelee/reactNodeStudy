@@ -18,15 +18,6 @@ import { authPlugin } from './plugins/authPlugin.js'
 
 const server: FastifyInstance = Fastify({ logger: true })
 
-// db.user
-//   .create({
-//     data: {
-//       username: 'Alice',
-//       passwordHash: 'abc',
-//     },
-//   })
-//   .then(() => console.log('abc'))
-
 /**swagger */
 await server.register(swaggerPlugin, swaggerConfig)
 await server.register(swaggerUiPlugin, swaggerUiConfig)
@@ -41,6 +32,7 @@ server.setErrorHandler(async (error, request, reply) => {
       name: error.name,
       statusCode: error.statusCode,
       message: error.message,
+      payload: error.payload,
     })
   }
   return error

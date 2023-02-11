@@ -31,11 +31,6 @@ const authPluginAsync: FastifyPluginAsync<MyPluginOptions> = async (
   fastify.decorateRequest('isExpiredToken', false)
 
   fastify.addHook('preHandler', async (request) => {
-    // const { authorization } = request.headers
-    // if (!authorization || !authorization.includes('Bearer')) {
-    //   return
-    // }
-
     const token =
       request.headers.authorization?.split('Bearer ')[1] ??
       request.cookies.access_token
@@ -68,5 +63,5 @@ const authPluginAsync: FastifyPluginAsync<MyPluginOptions> = async (
 // export default fp(authPluginAsync, '4.12.0')
 
 export const authPlugin = fp(authPluginAsync, {
-  name: 'global-authPlugin',
+  name: 'authPlugin',
 })

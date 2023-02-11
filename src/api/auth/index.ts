@@ -1,4 +1,5 @@
 import { FastifyPluginCallback, FastifyPluginAsync } from 'fastify'
+import requireAuthPlugin from '../../plugins/requireAuthPlugin.js'
 import UserService from '../../services/UserService.js'
 import { loginSchema, registerSchema } from './schema.js'
 import { AuthBody } from './types.js'
@@ -6,6 +7,14 @@ import { AuthBody } from './types.js'
 
 const auth: FastifyPluginAsync = async (fastify) => {
   const userService = UserService.getInstance()
+
+  // fastify.register(async (_fastify) => {
+  //   _fastify.register(requireAuthPlugin)
+
+  //   _fastify.get('/testme', async () => {
+  //     return 'cool'
+  //   })
+  // })
 
   fastify.post<{ Body: AuthBody }>(
     '/login',

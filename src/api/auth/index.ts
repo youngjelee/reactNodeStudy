@@ -47,5 +47,8 @@ const auth: FastifyPluginAsync = async (fastify) => {
       return authResult
     },
   )
+  fastify.post('/refresh', async () => {
+    console.log('b')
+  })
 }
 export default auth

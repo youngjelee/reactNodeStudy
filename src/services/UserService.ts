@@ -3,8 +3,14 @@ import bcrypt from 'bcrypt'
 import db from '../lib/db.js'
 import { Exception } from 'sass'
 import { AppError, isAppError } from '../lib/AppError.js'
-import { generateToken } from '../lib/tokens.js'
+import {
+  AccessTokenPayload,
+  generateToken,
+  RefreshTokenPayload,
+  validateToken,
+} from '../lib/tokens.js'
 import { User } from '@prisma/client'
+import App from 'next/app.js'
 
 const saltRounds = 10
 
@@ -22,19 +28,28 @@ class UserService {
     return UserService.instance
   }
 
-  async generateTokens(user: User) {
+  async generateTokens(user: User, existingTokenId?: number) {
     const { id: userId, username } = user
+    const tokenId =
+      existingTokenId ??
+      (
+        await db.token.create({
+          data: {
+            userId,
+          },
+        })
+      ).id
 
     const [accessToken, refreshToken] = await Promise.all([
       generateToken({
         type: 'accessToken',
         userId,
-        tokenId: 1,
+        tokenId,
         username,
       }),
       generateToken({
         type: 'refreshToken',
-        tokenId: 1,
+        tokenId,
         rotationCounter: 1,
       }),
     ])
@@ -91,6 +106,31 @@ class UserService {
     const tokens = await this.generateTokens(user)
 
     return { tokens, user }
+  }
+  //token 을 refresh 하고 return 해준다.
+  async refreshToken(token: string) {
+    // const decoded = await validateToken<RefreshTokenPayload>(token)
+    try {
+      const { tokenId } = await validateToken<RefreshTokenPayload>(token)
+
+      const tokenItem = await db.token.findUnique({
+        where: {
+          id: tokenId,
+        },
+        include: {
+          user: true,
+        },
+      })
+
+      if (!tokenItem) {
+        throw new Error('Token Not Found')
+      }
+
+      const tokens = this.generateTokens(tokenItem.user, tokenId)
+      return tokens
+    } catch (e) {
+      throw new AppError('RefreshTokenError')
+    }
   }
 
   // constructor(){}

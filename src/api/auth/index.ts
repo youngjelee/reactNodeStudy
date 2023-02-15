@@ -1,7 +1,12 @@
-import { FastifyPluginCallback, FastifyPluginAsync } from 'fastify'
+import {
+  FastifyPluginCallback,
+  FastifyPluginAsync,
+  FastifyReply,
+} from 'fastify'
+import { AppError } from '../../lib/AppError.js'
 import requireAuthPlugin from '../../plugins/requireAuthPlugin.js'
 import UserService from '../../services/UserService.js'
-import { loginSchema, registerSchema } from './schema.js'
+import { loginSchema, refreshTokenSchema, registerSchema } from './schema.js'
 import { AuthBody } from './types.js'
 // import fp from 'fastify-plugin'
 
@@ -22,15 +27,9 @@ const auth: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const authResult = await userService.login(request.body)
 
-      reply.setCookie('access_token', authResult.tokens.accessToken, {
-        httpOnly: true, //block javascript access to cookie
-        expires: new Date(Date.now() + 1000 * 60 * 60),
-        path: '/',
-      })
-      reply.setCookie('refesh_token', authResult.tokens.refreshToken, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-        path: '/',
+      setTokenCookie(reply, {
+        accessToken: authResult.tokens.accessToken,
+        refreshToken: authResult.tokens.refreshToken,
       })
 
       return authResult
@@ -47,8 +46,42 @@ const auth: FastifyPluginAsync = async (fastify) => {
       return authResult
     },
   )
-  fastify.post('/refresh', async () => {
-    console.log('b')
+
+  fastify.post<{ Body: { refreshToken?: string } }>(
+    '/refresh',
+    { schema: refreshTokenSchema },
+    async (request, reply) => {
+      const refreshToken =
+        request.body.refreshToken ?? request.cookies.refresh_token ?? ''
+      console.log(refreshToken)
+      if (!refreshToken) {
+        throw new AppError('BadRequestError')
+      }
+      const tokens = await userService.refreshToken(refreshToken)
+
+      setTokenCookie(reply, {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      })
+
+      return tokens
+    },
+  )
+}
+
+function setTokenCookie(
+  reply: FastifyReply,
+  tokens: { accessToken: string; refreshToken: string },
+) {
+  reply.setCookie('access_token', tokens.accessToken, {
+    httpOnly: true, //block javascript access to cookie
+    expires: new Date(Date.now() + 1000 * 60 * 60),
+    path: '/',
+  })
+  reply.setCookie('refresh_token', tokens.refreshToken, {
+    httpOnly: true, //block javascript access to cookie
+    expires: new Date(Date.now() + 1000 * 60 * 60),
+    path: '/',
   })
 }
 export default auth

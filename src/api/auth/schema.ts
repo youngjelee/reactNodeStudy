@@ -22,6 +22,7 @@ const authBodySchema = {
     username: { type: 'string' },
     password: { type: 'string' },
   },
+  required: ['username', 'password'],
 }
 
 export const loginSchema: FastifySchema = {
@@ -46,4 +47,8 @@ export const registerSchema: FastifySchema = {
       statusCode: { type: 'number' },
     }),
   },
+}
+
+export const refreshTokenSchema: FastifySchema = {
+  body: { type: 'object', properties: { refreshToken: { type: 'string' } } },
 }

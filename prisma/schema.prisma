@@ -1,6 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+//수정후 yarn prisma migrate dev
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,6 +19,7 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   Item         Item[]
+  Token        Token[]
 }
 
 model Item {
@@ -27,6 +28,17 @@ model Item {
   description String
   user        User   @relation(fields: [userId], references: [id])
   userId      Int
+
+  @@index([userId])
+}
+
+//token 정보를 데이터베이스에 담는 용도
+model Token {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  blocked   Boolean  @default(false)
 
   @@index([userId])
 }
